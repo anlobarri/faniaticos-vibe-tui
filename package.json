@@ -1,6 +1,6 @@
 {
   "name": "faniaticos-vibe",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Herramienta TUI para inicializar proyectos de Vibe Coding",
   "main": "index.js",
   "type": "module",

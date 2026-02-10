@@ -23,12 +23,17 @@ Nuevo stack para flujos de trabajo automatizados, integrando skills especializad
 
 ## 🚀 Instalación y Uso
 
-1. **Instalación Global (Recomendado):**
+1. **Ejecución Directa (Recomendado):**
+   ```bash
+   npx faniaticos-vibe
+   ```
+   *No necesitas instalar nada. Se descarga, ejecuta y listo.*
+
+2. **Instalación Global (Alternativa):**
    ```bash
    npm install -g faniaticos-vibe
    ```
-
-2. **Ejecución:**
+   Después ejecuta:
    ```bash
    faniaticos-vibe
    ```
