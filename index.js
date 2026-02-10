@@ -94,16 +94,7 @@ async function main() {
         const bannerText = await banner();
         printBanner(bannerText);
 
-        // 2. Ask for project name
-        const projectName = await input({
-            message: chalk.cyan("📁 ¿Cómo se llama tu proyecto?"),
-            validate: (input) => {
-                if (!input.trim()) return "El nombre del proyecto no puede estar vacío.";
-                if (/[<>:"/\\|?*]/.test(input)) return "El nombre contiene caracteres no válidos.";
-                return true;
-            },
-        });
-
+        // 2. Ask for stack
         const stack = await select({
             message: chalk.cyan("🛠️  ¿En qué quieres trabajar hoy?"),
             choices: [
@@ -131,15 +122,13 @@ async function main() {
             process.exit(1);
         }
 
-        const sanitizedName = projectName.trim().replace(/\s+/g, "-").toLowerCase();
-        const projectPath = path.resolve(process.cwd(), sanitizedName);
-        const skillsPath = path.join(projectPath, ".agent", "skills");
+        const projectPath = process.cwd();
+        const folderName = path.basename(projectPath);
 
         // 5. Execution Flow
         logStep(null, "start");
 
-        logStep(`Creando estructura en ${chalk.white(sanitizedName)}...`);
-        fs.mkdirSync(skillsPath, { recursive: true });
+        logStep(`Inicializando entorno en ${chalk.white(folderName)}...`);
 
         logStep("Generando archivo .gitignore...");
         const gitignorePath = path.join(projectPath, ".gitignore");
@@ -191,10 +180,6 @@ async function main() {
 
         console.log(chalk.white("   Ubicación:"));
         console.log(chalk.cyan(`   ${projectPath}\n`));
-
-        console.log(chalk.white("   Próximos pasos:"));
-        console.log(chalk.hex("#A855F7")(`   $ cd ${sanitizedName}`));
-        console.log(chalk.hex("#A855F7")("   $ code .\n"));
 
         console.log(chalk.gray("─".repeat(60)));
         console.log(
