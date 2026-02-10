@@ -10,27 +10,7 @@ import gradient from "gradient-string";
 import fs from "fs";
 import path from "path";
 import { execSync } from "child_process";
-
-// ─── Config ────────────────────────────────────────────────────────────────────
-const STACKS = {
-    wordpress: {
-        label: "WordPress",
-        downloads: [
-            { src: "Automattic/agent-skills/skills", dest: ".agent/skills" }
-        ]
-    },
-    nextjs: {
-        label: "Next.js (React Best Practices + Design)",
-        downloads: [
-            // Vercel Labs: React Best Practices
-            { src: "vercel-labs/agent-skills/skills/react-best-practices", dest: ".agent/skills/react-best-practices/skills" },
-            // Vercel Labs: Rules
-            { src: "vercel-labs/agent-skills/rules", dest: ".agent/skills/react-best-practices/rules" },
-            // Anthropics: Frontend Design
-            { src: "anthropics/skills/skills/frontend-design", dest: ".agent/skills/frontend-design" }
-        ]
-    }
-};
+import { STACKS } from "./stacks.js";
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 function banner() {
@@ -145,8 +125,7 @@ async function main() {
 
         for (const resource of stackConfig.downloads) {
             const resourceDest = path.join(projectPath, resource.dest);
-            const resourceName = resource.src.split("/").pop(); // Simple name extraction
-
+            const resourceName = resource.src.split("/").pop();
             logStep(`Descargando ${chalk.cyan(resourceName)}...`, "info");
 
             try {
