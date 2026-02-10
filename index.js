@@ -74,6 +74,7 @@ async function main() {
             choices: [
                 { name: "🌐 WordPress", value: "wordpress" },
                 { name: "⚛️  Next.js (React Best Practices)", value: "nextjs" },
+                { name: "🤖 Automatizaciones con n8n", value: "n8n" },
                 new Separator(),
                 { name: chalk.gray("🔜 Más stacks próximamente..."), value: null, disabled: true },
             ],
