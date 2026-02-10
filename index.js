@@ -13,8 +13,21 @@ import { execSync } from "child_process";
 const STACKS = {
     wordpress: {
         label: "WordPress",
-        repo: "Automattic/agent-skills/skills",
+        downloads: [
+            { src: "Automattic/agent-skills/skills", dest: ".agent/skills" }
+        ]
     },
+    nextjs: {
+        label: "Next.js (React Best Practices + Design)",
+        downloads: [
+            // Vercel Labs: React Best Practices
+            { src: "vercel-labs/agent-skills/skills/react-best-practices", dest: ".agent/skills/react-best-practices/skills" },
+            // Vercel Labs: Rules
+            { src: "vercel-labs/agent-skills/rules", dest: ".agent/skills/react-best-practices/rules" },
+            // Anthropics: Frontend Design
+            { src: "anthropics/skills/skills/frontend-design", dest: ".agent/skills/frontend-design" }
+        ]
+    }
 };
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -95,6 +108,7 @@ async function main() {
             message: chalk.cyan("🛠️  ¿En qué quieres trabajar hoy?"),
             choices: [
                 { name: "🌐 WordPress", value: "wordpress" },
+                { name: "⚛️  Next.js (React Best Practices)", value: "nextjs" },
                 new Separator(),
                 { name: chalk.gray("🔜 Más stacks próximamente..."), value: null, disabled: true },
             ],
@@ -142,15 +156,31 @@ async function main() {
             }
         }
 
-        logStep(`Descargando skills de ${chalk.white.bold(stackConfig.label)}...`, "active");
-        const emitter = degit(stackConfig.repo, {
-            cache: false,
-            force: true,
-            verbose: false,
-        });
+        // Process downloads
+        logStep(`Descargando recursos para ${chalk.white.bold(stackConfig.label)}...`, "active");
 
-        await emitter.clone(skillsPath);
-        logStep("Skills sincronizadas localmente.", "success");
+        for (const resource of stackConfig.downloads) {
+            const resourceDest = path.join(projectPath, resource.dest);
+            const resourceName = resource.src.split("/").pop(); // Simple name extraction
+
+            logStep(`Descargando ${chalk.cyan(resourceName)}...`, "info");
+
+            try {
+                fs.mkdirSync(resourceDest, { recursive: true });
+                const emitter = degit(resource.src, {
+                    cache: false,
+                    force: true,
+                    verbose: false,
+                });
+
+                await emitter.clone(resourceDest);
+                logStep(`  ${resourceName} ✔`, "success");
+            } catch (err) {
+                logStep(`Error descargando ${resourceName}: ${err.message}`, "error");
+            }
+        }
+
+        logStep("Todos los recursos sincronizados.", "success");
 
         logStep(null, "end");
 
