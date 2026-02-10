@@ -61,7 +61,7 @@ async function main() {
         const stack = await select({
             message: chalk.cyan("🛠️  ¿En qué quieres trabajar hoy?"),
             choices: [
-                { name: "🌐 WordPress (Automattic Agent Skills)", value: "wordpress" },
+                { name: "🌐 WordPress", value: "wordpress" },
                 new Separator(),
                 { name: chalk.gray("🔜 Más stacks próximamente..."), value: null, disabled: true },
             ],
@@ -93,6 +93,12 @@ async function main() {
         console.log(chalk.yellow("📂 Creando estructura del proyecto..."));
         fs.mkdirSync(skillsPath, { recursive: true });
         console.log(chalk.green(`   ✔ Carpeta creada: ${chalk.white(projectPath)}`));
+
+        // Create .gitignore
+        const gitignorePath = path.join(projectPath, ".gitignore");
+        const gitignoreContent = ".agent/skills/\nnode_modules/\n";
+        fs.writeFileSync(gitignorePath, gitignoreContent);
+        console.log(chalk.green("   ✔ Archivo .gitignore creado."));
 
         // 5. Download skills with degit
         console.log(chalk.yellow("\n⬇️  Descargando skills desde ") + chalk.white.bold(stackConfig.label) + chalk.yellow("..."));
