@@ -62,6 +62,26 @@ function logStep(message, type = "info") {
 
 // ─── Main ──────────────────────────────────────────────────────────────────────
 async function main() {
+    // Check for flags
+    const args = process.argv.slice(2);
+
+    if (args.includes("--version") || args.includes("-v")) {
+        const packageJson = JSON.parse(fs.readFileSync(new URL("./package.json", import.meta.url)));
+        console.log(packageJson.version);
+        process.exit(0);
+    }
+
+    if (args.includes("--help") || args.includes("-h")) {
+        console.log(`
+  Uso: faniaticos-vibe [opciones]
+
+  Opciones:
+    -v, --version  Muestra la versión actual
+    -h, --help     Muestra esta ayuda
+        `);
+        process.exit(0);
+    }
+
     try {
         // 1. Show banner
         const bannerText = await banner();

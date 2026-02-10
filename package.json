@@ -1,11 +1,19 @@
 {
-  "name": "faniaticos-vibe-tui",
+  "name": "faniaticos-vibe",
   "version": "1.0.0",
   "description": "Herramienta TUI para inicializar proyectos de Vibe Coding",
   "main": "index.js",
   "type": "module",
   "bin": {
     "faniaticos-vibe": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "stacks.js",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "start": "node index.js"
