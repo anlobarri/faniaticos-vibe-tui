@@ -7,7 +7,7 @@ export const STACKS = {
         ]
     },
     nextjs: {
-        label: "Next.js (React Best Practices + Design)",
+        label: "Next.js",
         downloads: [
             { src: "vercel-labs/agent-skills/skills/react-best-practices", dest: ".agent/skills/react-best-practices/skills" },
             { src: "anlobarri/faniaticos-vibe-resources/nextjs/.agent/rules", dest: ".agent/rules" },

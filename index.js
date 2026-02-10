@@ -11,6 +11,7 @@ import fs from "fs";
 import path from "path";
 import { execSync } from "child_process";
 import { STACKS } from "./stacks.js";
+import { handleNextJsInit } from "./stack-handlers.js";
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 function banner() {
@@ -100,12 +101,15 @@ async function main() {
             ],
         });
 
-        // 4. Ask for git initialization
-        const initGit = await confirm({
-            message: chalk.cyan("🔧 ¿Quieres inicializar un repositorio git?"),
-            theme: { prefix: chalk.hex("#A855F7")("✔ ") },
-            default: true,
-        });
+        // 4. Ask for git initialization (OFF for Next.js as create-next-app handles it)
+        let initGit = false;
+        if (stack !== "nextjs") {
+            initGit = await confirm({
+                message: chalk.cyan("🔧 ¿Quieres inicializar un repositorio git?"),
+                theme: { prefix: chalk.hex("#A855F7")("✔ ") },
+                default: true,
+            });
+        }
 
         if (!stack) {
             console.log(chalk.yellow("\n⚠️ Ningún stack seleccionado. Saliendo...\n"));
@@ -133,18 +137,54 @@ async function main() {
             }
         }
 
-        const projectPath = process.cwd();
-        const folderName = path.basename(projectPath);
+        // ─── Special Logic for Next.js: create-next-app ───
+        let projectPath = process.cwd();
+        let folderName = path.basename(projectPath);
+
+
+        if (stack === "nextjs") {
+            const result = await handleNextJsInit(logStep);
+            if (result.success) {
+                // Update implementation details based on handler result
+                projectPath = result.projectPath;
+                folderName = result.folderName;
+            }
+        }
 
         // 5. Execution Flow
         logStep(null, "start");
 
         logStep(`Inicializando entorno en ${chalk.white(folderName)}...`);
 
-        logStep("Generando archivo .gitignore...");
+        logStep("Configurando .gitignore...");
         const gitignorePath = path.join(projectPath, ".gitignore");
-        const gitignoreContent = ".agent/skills/\nnode_modules/\n";
-        fs.writeFileSync(gitignorePath, gitignoreContent);
+        const skillIgnore = ".agent/skills/";
+        const comment = "# skills";
+
+        let finalContent = "";
+
+        if (fs.existsSync(gitignorePath)) {
+            const existingContent = fs.readFileSync(gitignorePath, "utf-8");
+            finalContent = existingContent;
+
+            // Check if .agent/skills/ is already ignored
+            if (!finalContent.includes(skillIgnore)) {
+                if (!finalContent.endsWith("\n")) finalContent += "\n";
+                // Add with comment
+                finalContent += `\n${comment}\n${skillIgnore}\n`;
+            }
+        } else {
+            // If .gitignore doesn't exist, create it with just our rule (or default + rule)
+            // Since User said "don't include node_modules as Vercel does it", 
+            // but if we are creating a fresh one (not Next.js), we might want safe defaults?
+            // User context implies Next.js heavily, but let's stick to their specific request:
+            // "solamente el .agent/skills" implies for *this addition*. 
+            // If the file doesn't exist (unlikely for Next.js, but possible for others), 
+            // we should probably still add it.
+            finalContent = `${comment}\n${skillIgnore}\n`;
+        }
+
+        fs.writeFileSync(gitignorePath, finalContent);
 
         if (initGit) {
             logStep("Inicializando repositorio git...");
