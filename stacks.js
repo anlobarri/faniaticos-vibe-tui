@@ -14,9 +14,18 @@ export const STACKS = {
             // Vercel Labs: React Best Practices
             { src: "vercel-labs/agent-skills/skills/react-best-practices", dest: ".agent/skills/react-best-practices/skills" },
             // Vercel Labs: Rules
-            { src: "vercel-labs/agent-skills/rules", dest: ".agent/skills/react-best-practices/rules" },
+            { src: "anlobarri/faniaticos-vibe-resources/nextjs/.agent/rules", dest: ".agent/rules" },
             // Anthropics: Frontend Design
             { src: "anthropics/skills/skills/frontend-design", dest: ".agent/skills/frontend-design" }
+        ],
+        optionals: [
+            {
+                id: "copywriting",
+                message: "✍️  ¿Quieres integrar habilidades de copywriting para tu web?",
+                downloads: [
+                    { src: "coreyhaines31/marketingskills/skills", dest: ".agent/skills/copywriting" }
+                ]
+            }
         ]
     }
 };

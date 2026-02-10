@@ -91,10 +91,25 @@ async function main() {
             process.exit(0);
         }
 
-        const stackConfig = STACKS[stack];
+        const stackConfig = JSON.parse(JSON.stringify(STACKS[stack])); // Deep clone to avoid mutating original config
         if (!stackConfig) {
             console.log(chalk.red("\n❌ Stack no encontrado.\n"));
             process.exit(1);
+        }
+
+        // Process Optional Features from Config
+        if (stackConfig.optionals && Array.isArray(stackConfig.optionals)) {
+            for (const opt of stackConfig.optionals) {
+                const addOptional = await confirm({
+                    message: chalk.cyan(opt.message),
+                    theme: { prefix: chalk.hex("#A855F7")("✔ ") },
+                    default: false,
+                });
+
+                if (addOptional && opt.downloads) {
+                    stackConfig.downloads.push(...opt.downloads);
+                }
+            }
         }
 
         const projectPath = process.cwd();
