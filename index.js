@@ -4,6 +4,7 @@ import { input, select, Separator, confirm } from "@inquirer/prompts";
 import degit from "degit";
 import chalk from "chalk";
 import figlet from "figlet";
+import gradient from "gradient-string";
 import fs from "fs";
 import path from "path";
 import { execSync } from "child_process";
@@ -19,7 +20,7 @@ const STACKS = {
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 function banner() {
     return new Promise((resolve, reject) => {
-        figlet.text("Faniaticos Vibe", { font: "Standard" }, (err, data) => {
+        figlet.text("Faniaticos Vibe", { font: "ANSI Shadow" }, (err, data) => {
             if (err) return reject(err);
             resolve(data);
         });
@@ -27,18 +28,50 @@ function banner() {
 }
 
 function printBanner(text) {
+    const purpleGradient = gradient(["#7B2FBE", "#A855F7", "#D8B4FE"]);
     console.log("");
-    console.log(chalk.hex("#7B2FBE").bold(text));
+    console.log(purpleGradient.multiline(text));
     console.log(
         chalk.gray("─".repeat(60))
     );
     console.log(
-        chalk.hex("#A855F7")(
-            "  🚀 Vibe Coding Project Manager"
+        chalk.hex("#A855F7").bold(
+            "  🚀 FANIATICOS VIBE · PROJECT MANAGER"
         )
     );
     console.log(chalk.gray("─".repeat(60)));
     console.log("");
+}
+
+function logStep(message, type = "info") {
+    const symbols = {
+        info: chalk.hex("#A855F7")("◇"),
+        active: chalk.hex("#7B2FBE")("●"),
+        success: chalk.green("✔"),
+        error: chalk.red("✖"),
+        line: chalk.gray("│"),
+    };
+
+    if (type === "start") {
+        console.log(chalk.gray("\n  ┌── processing ──┐"));
+        return;
+    }
+
+    if (type === "end") {
+        console.log(chalk.gray("  └────────────────┘\n"));
+        return;
+    }
+
+    console.log(`  ${symbols.line}`);
+    if (type === "active") {
+        console.log(`  ${symbols.active} ${chalk.white(message)}`);
+    } else if (type === "success") {
+        console.log(`  ${symbols.success} ${chalk.green(message)}`);
+    } else if (type === "error") {
+        console.log(`  ${symbols.error} ${chalk.red(message)}`);
+    } else {
+        console.log(`  ${symbols.info} ${chalk.gray(message)}`);
+    }
 }
 
 // ─── Main ──────────────────────────────────────────────────────────────────────
@@ -88,21 +121,28 @@ async function main() {
         const projectPath = path.resolve(process.cwd(), sanitizedName);
         const skillsPath = path.join(projectPath, ".agent", "skills");
 
-        // 4. Create project folder structure
-        console.log("");
-        console.log(chalk.yellow("📂 Creando estructura del proyecto..."));
-        fs.mkdirSync(skillsPath, { recursive: true });
-        console.log(chalk.green(`   ✔ Carpeta creada: ${chalk.white(projectPath)}`));
+        // 5. Execution Flow
+        logStep(null, "start");
 
-        // Create .gitignore
+        logStep(`Creando estructura en ${chalk.white(sanitizedName)}...`);
+        fs.mkdirSync(skillsPath, { recursive: true });
+
+        logStep("Generando archivo .gitignore...");
         const gitignorePath = path.join(projectPath, ".gitignore");
         const gitignoreContent = ".agent/skills/\nnode_modules/\n";
         fs.writeFileSync(gitignorePath, gitignoreContent);
-        console.log(chalk.green("   ✔ Archivo .gitignore creado."));
 
-        // 5. Download skills with degit
-        console.log(chalk.yellow("\n⬇️  Descargando skills desde ") + chalk.white.bold(stackConfig.label) + chalk.yellow("..."));
+        if (initGit) {
+            logStep("Inicializando repositorio git...");
+            try {
+                execSync("git init", { cwd: projectPath, stdio: "ignore" });
+                logStep("Git inicializado correctamente.", "success");
+            } catch (gitError) {
+                logStep(`Error git: ${gitError.message}`, "error");
+            }
+        }
 
+        logStep(`Descargando skills de ${chalk.white.bold(stackConfig.label)}...`, "active");
         const emitter = degit(stackConfig.repo, {
             cache: false,
             force: true,
@@ -110,32 +150,25 @@ async function main() {
         });
 
         await emitter.clone(skillsPath);
-        console.log(chalk.green("   ✔ Skills descargadas correctamente.\n"));
+        logStep("Skills sincronizadas localmente.", "success");
 
-        // 6. Initialize Git if requested
-        if (initGit) {
-            console.log(chalk.yellow("🔧 Inicializando repositorio git..."));
-            try {
-                execSync("git init", { cwd: projectPath, stdio: "ignore" });
-                console.log(chalk.green("   ✔ Repositorio git inicializado.\n"));
-            } catch (gitError) {
-                console.log(chalk.red(`   ⚠️ No se pudo inicializar git: ${gitError.message}\n`));
-            }
-        }
+        logStep(null, "end");
 
         // 6. Success summary
         console.log(chalk.gray("─".repeat(60)));
-        console.log(chalk.hex("#7B2FBE").bold("\n🎉 ¡Proyecto listo!\n"));
-        console.log(chalk.white("   Skills instaladas en:"));
-        console.log(chalk.cyan(`   ${skillsPath}\n`));
+        const successTitle = gradient(["#7B2FBE", "#D8B4FE"])("  🎉 ¡PROYECTO LISTO!");
+        console.log(`\n${successTitle}\n`);
 
-        console.log(chalk.white("   Para empezar:"));
-        console.log(chalk.green(`   $ cd ${sanitizedName}`));
-        console.log(chalk.green("   $ code .\n"));
+        console.log(chalk.white("   Ubicación:"));
+        console.log(chalk.cyan(`   ${projectPath}\n`));
+
+        console.log(chalk.white("   Próximos pasos:"));
+        console.log(chalk.hex("#A855F7")(`   $ cd ${sanitizedName}`));
+        console.log(chalk.hex("#A855F7")("   $ code .\n"));
 
         console.log(chalk.gray("─".repeat(60)));
         console.log(
-            chalk.hex("#A855F7")("   ✨ Happy Vibe Coding! — Faniaticos.club\n")
+            chalk.hex("#7B2FBE").bold("   ✨ Happy Vibe Coding! — Faniaticos.club\n")
         );
     } catch (error) {
         if (error.isTtyError) {
